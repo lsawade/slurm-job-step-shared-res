@@ -69,14 +69,14 @@ echo
 
 export SLURM_HOSTFILE=host1.list
 echo "Submission 1"
-srun -n 6 --cpus-per-task=1 --gpus-per-task 1 --distribution=arbitrary show_devices.sh 0 & 
+srun -n 6 --cpus-per-task=1 --gpus-per-task 1 --distribution=arbitrary script.sh 0 &
 sleep 2
 
 export SLURM_HOSTFILE=host2.list
-echo "Submission 2?"
-srun -n 6 --cpus-per-task 1 --gpus-per-task 1 --distribution=arbitrary show_devices.sh 1 & 
+echo "Submission 2"
+srun -n 6 --cpus-per-task 1 --gpus-per-task 1 --distribution=arbitrary script.sh 1 & 
 
 echo "Pre-wait print"
 wait
 
-echo "Post-wait print""
+echo "Post-wait print"
