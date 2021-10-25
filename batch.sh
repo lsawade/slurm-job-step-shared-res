@@ -1,8 +1,10 @@
 #!/bin/bash
 #SBATCH -t00:05:00
-#SBATCH --gpus 12
-#SBATCH -n 12
+#SBATCH -N 2
+#SBATCH --gpus 8
+#SBATCH -n 8
 #SBATCH --output=mixed_gpu.txt
+#SBATCH --reservation=test
 
 # The above request will ask for 3 nodes on Traverse
 # because each node has 4 gpus (12 / 4 = 3)
@@ -18,8 +20,10 @@
 module load openmpi/gcc cudatoolkit
 
 my_srun() {
-  export SLURM_HOSTFILE="$1"
-  srun -n 6 --gpus=6 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary script.sh 
+    # $1 is hosfile
+    # $2 is task/gpu count
+    export SLURM_HOSTFILE="$1"
+    srun -n $2 --gpus=$2 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary script.sh 
 }
 
 
@@ -30,8 +34,8 @@ cyclic() {
      scontrol show hostnames "${SLURM_JOB_NODELIST}" > host2.cyclic.list
      scontrol show hostnames "${SLURM_JOB_NODELIST}" >> host2.cyclic.list
 
-     my_srun host1.cyclic.list > cyclic.1.out 2>&1 &
-     my_srun host2.cyclic.list > cyclic.2.out 2>&1 &
+     my_srun host1.cyclic.list 4 > cyclic.1.out 2>&1 &
+     my_srun host2.cyclic.list 4 > cyclic.2.out 2>&1 &
      wait
 }
 
@@ -47,13 +51,9 @@ block() {
 
      scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 > host2.block.list
      scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host2.block.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
 
-     my_srun host1.block.list > block.1.out 2>&1 &
-     my_srun host2.block.list > block.2.out 2>&1 &
+     my_srun host1.block.list 6 > block.1.out 2>&1 &
+     my_srun host2.block.list 2 > block.2.out 2>&1 &
      wait
 
 }
