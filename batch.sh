@@ -19,7 +19,7 @@ module load openmpi/gcc cudatoolkit
 
 my_srun() {
   export SLURM_HOSTFILE="$1"
-  srun -n 6 --gpus=6 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary show_devices.sh 
+  srun -n 6 --gpus=6 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary script.sh 
 }
 
 
