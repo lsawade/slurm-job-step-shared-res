@@ -1,7 +1,7 @@
 #!/bin/bash
 
-sleep $((7 * $1))
-sleep $SLURM_PROCID
-echo SCRIPT: $1 -- JOB: $SLURM_JOB_ID -- STEP: $SLURM_STEP_ID -- PROC: $SLURM_PROCID
+
+echo ${SLURM_JOB_ID}.${SLURM_STEP_ID}.$SLURM_PROCID START $(date) @ $(hostname): $CUDA_VISIBLE_DEVICES
 sleep 60
+echo ${SLURM_JOB_ID}.${SLURM_STEP_ID}.$SLURM_PROCID STOP $(date)
 

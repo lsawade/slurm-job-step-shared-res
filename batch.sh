@@ -17,66 +17,46 @@
 
 module load openmpi/gcc cudatoolkit
 
-atype=cyclic
+my_srun() {
+  export SLURM_HOSTFILE="$1"
+  srun -n 6 --gpus=6 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary show_devices.sh 
+}
 
 
-# Writing Node lists in cyclicly
-if [ "$atype" == "cyclic" ];
-then
-    
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" > host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" >> host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" > host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" >> host2.list
+# Writing host lists in cyclicly
+cyclic() {    
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" > host1.cyclic.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" >> host1.cyclic.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" > host2.cyclic.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" >> host2.cyclic.list
 
-# Writing Node lists in Chunks
-# DOESNT WORK AT ALL!     
-elif [ "$atype" == "block" ];
-then
-
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 > host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host1.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host1.list
-
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 > host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.list
-     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.list
-
-else
-
-    echo Task assignment "$atype" not implemented -- exiting.
-    exit
-
-fi
+     my_srun host1.cyclic.list > cyclic.1.out 2>&1 &
+     my_srun host2.cyclic.list > cyclic.2.out 2>&1 &
+     wait
+}
 
 
-# Print nodelist content
-echo
-echo Printing hostlists
-echo
-echo Hosts 1
-cat host1.list
-echo
-echo Hosts 2
-cat host2.list
-echo
+# Writinng host files in block
+block() {
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 > host1.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -1 >> host1.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host1.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host1.block.list
 
-export SLURM_HOSTFILE=host1.list
-echo "Submission 1"
-srun -n 6 --cpus-per-task=1 --gpus-per-task 1 --distribution=arbitrary script.sh 0 &
-sleep 2
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 > host2.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | tail -1 >> host2.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
+     scontrol show hostnames "${SLURM_JOB_NODELIST}" | head -2 | tail -1 >> host2.block.list
 
-export SLURM_HOSTFILE=host2.list
-echo "Submission 2"
-srun -n 6 --cpus-per-task 1 --gpus-per-task 1 --distribution=arbitrary script.sh 1 & 
+     my_srun host1.block.list > block.1.out 2>&1 &
+     my_srun host2.block.list > block.2.out 2>&1 &
+     wait
 
-echo "Pre-wait print"
-wait
+}
 
-echo "Post-wait print"
+block
+cyclic
