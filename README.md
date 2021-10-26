@@ -96,6 +96,8 @@ and `cyclic.1.out` and `cyclic.2.out` as well.
 
 The unexpected/unwanted output on Traverse:
 
+<details>
+
 ```bash
 block.1.out
 srun: Job 258710 step creation temporarily disabled, retrying (Requested nodes are busy)
@@ -138,6 +140,8 @@ srun: Step created for job 258710
 258710.1.1 STOP Mon Oct 25 19:39:24 EDT 2021
 258710.1.3 STOP Mon Oct 25 19:39:24 EDT 2021
 ```
+
+</details>
 
 It almost looks like there is a misunderstanding of slurm in terms of `CUDA_VISIBLE_DEVICES`?
 
