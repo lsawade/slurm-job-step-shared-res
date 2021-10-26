@@ -23,7 +23,7 @@ my_srun() {
     # $1 is hosfile
     # $2 is task/gpu count
     export SLURM_HOSTFILE="$1"
-    srun -n $2 --gpus=$2 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary script.sh 
+    srun -n $2 --gpus=$2 --cpus-per-task=1 --gpus-per-task=1 --distribution=arbitrary --exclusive script.sh 
 }
 
 
@@ -58,5 +58,5 @@ block() {
 
 }
 
-block
 cyclic
+block
