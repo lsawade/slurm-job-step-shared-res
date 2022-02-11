@@ -94,7 +94,78 @@ Note, the numbers after the colon which show the `$CUDA_VISIBLE_DEVICES`. Also,
 note, how `block1.1.out` and `block1.2.out` have the same `START` times, 
 and `cyclic.1.out` and `cyclic.2.out` as well. 
 
-The unexpected/unwanted output on Traverse:
+I added a second set of assignments where slurm takes care of the assignment.
+Meaning, I'm not specifiying any hostfile that manually assigns tasks to a specific host.
+The commands are defined as
+
+```bash
+# Runs two jobsteps with each 4 tasks and 1 gpu per task
+normal_no_host() {...}
+
+# Runs two jobsteps with one with 2 tasks and one with 6 tasks, each with 1 gpu per task
+block_no_host() {...}
+```
+
+So, each function should run a total of 8 tasks simultaneously.
+
+Check output files like so:
+
+```bash
+for file in nohost*out; do echo $file; cat $file; done
+```
+
+The wanted ouput from Traverse looks as follows
+
+<details>
+
+```
+nohost.block.1.out
+287363.6.0 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g1: CPUs=pid 928746's current affinity list: 0-3, GPU-PCI-ID: 00000004:04:00.0
+287363.6.5 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g2: CPUs=pid 897493's current affinity list: 8-11, GPU-PCI-ID: 00000035:03:00.0
+287363.6.2 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g1: CPUs=pid 928749's current affinity list: 8-11, GPU-PCI-ID: 00000035:03:00.0
+287363.6.1 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g1: CPUs=pid 928748's current affinity list: 4-7, GPU-PCI-ID: 00000004:05:00.0
+287363.6.3 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g2: CPUs=pid 897491's current affinity list: 0-3, GPU-PCI-ID: 00000004:04:00.0
+287363.6.4 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g2: CPUs=pid 897492's current affinity list: 4-7, GPU-PCI-ID: 00000004:05:00.0
+287363.6.2 STOP Fri Feb 11 15:09:40 EST 2022
+287363.6.0 STOP Fri Feb 11 15:09:40 EST 2022
+287363.6.1 STOP Fri Feb 11 15:09:40 EST 2022
+287363.6.5 STOP Fri Feb 11 15:09:40 EST 2022
+287363.6.3 STOP Fri Feb 11 15:09:40 EST 2022
+287363.6.4 STOP Fri Feb 11 15:09:40 EST 2022
+nohost.block.2.out
+287363.7.0 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g1: CPUs=pid 928747's current affinity list: 12-15, GPU-PCI-ID: 00000035:04:00.0
+287363.7.1 START Fri Feb 11 15:08:40 EST 2022 @ traverse-k05g2: CPUs=pid 897490's current affinity list: 12-15, GPU-PCI-ID: 00000035:04:00.0
+287363.7.0 STOP Fri Feb 11 15:09:40 EST 2022
+287363.7.1 STOP Fri Feb 11 15:09:40 EST 2022
+nohost.normal.1.out
+287363.5.2 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g2: CPUs=pid 897323's current affinity list: 8-11, GPU-PCI-ID: 00000035:03:00.0
+287363.5.3 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g2: CPUs=pid 897324's current affinity list: 12-15, GPU-PCI-ID: 00000035:04:00.0
+287363.5.1 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g1: CPUs=pid 928617's current affinity list: 12-15, GPU-PCI-ID: 00000035:04:00.0
+287363.5.0 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g1: CPUs=pid 928616's current affinity list: 8-11, GPU-PCI-ID: 00000035:03:00.0
+287363.5.2 STOP Fri Feb 11 15:08:39 EST 2022
+287363.5.3 STOP Fri Feb 11 15:08:39 EST 2022
+287363.5.0 STOP Fri Feb 11 15:08:39 EST 2022
+287363.5.1 STOP Fri Feb 11 15:08:39 EST 2022
+nohost.normal.2.out
+287363.4.3 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g2: CPUs=pid 897321's current affinity list: 4-7, GPU-PCI-ID: 00000004:05:00.0
+287363.4.2 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g2: CPUs=pid 897320's current affinity list: 0-3, GPU-PCI-ID: 00000004:04:00.0
+287363.4.1 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g1: CPUs=pid 928619's current affinity list: 4-7, GPU-PCI-ID: 00000004:05:00.0
+287363.4.0 START Fri Feb 11 15:07:39 EST 2022 @ traverse-k05g1: CPUs=pid 928618's current affinity list: 0-3, GPU-PCI-ID: 00000004:04:00.0
+287363.4.2 STOP Fri Feb 11 15:08:39 EST 2022
+287363.4.3 STOP Fri Feb 11 15:08:39 EST 2022
+287363.4.0 STOP Fri Feb 11 15:08:39 EST 2022
+287363.4.1 STOP Fri Feb 11 15:08:39 EST 2022
+```
+
+</details>
+
+
+
+Previously, these two sets of submission wouldn't work correctly/I didn't know
+how to properly assign the gpus and the tasks (due to the hardware threads).
+The unexpected/unwanted output on Traverse.
+
+
 
 <details>
 

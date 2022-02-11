@@ -2,7 +2,7 @@
 #SBATCH -t00:05:00
 #SBATCH -N 2
 #SBATCH -n 64
-#SBATCH --cpus-per-task=4
+# #  SBATCH --cpus-per-task=4
 #SBATCH --ntasks-per-core=1
 #SBATCH --output=mixed_gpu.txt
 #SBATCH --reservation=test
@@ -39,15 +39,9 @@ my_srun() {
     # $1 is hosfile
     # $2 is task/gpu count
     export SLURM_HOSTFILE="$1"
-    srun --ntasks=$2 --gpus-per-task=1 --cpus-per-task=4 --ntasks-per-core=1 --distribution=arbitrary script.sh 
+    srun --ntasks=$2 --gpus-per-task=1 --cpus-per-task=4 --ntasks-per-core=1 --distribution=arbitrary script.sh
 }
 
-my_srun_no_host() {
-    # $1 is hosfile
-    # $2 is task/gpu count
-    # export SLURM_HOSTFILE="$1"
-    srun --ntasks=$1 --gpus-per-task=1 --cpus-per-task=4 --ntasks-per-core=1 script.sh 
-}
 # --Ntasks-per-node=2
 
 
@@ -82,10 +76,23 @@ block() {
 
 }
 
+
+cyclic
+block
+
+
+my_srun_no_host() {
+    # $1 is hosfile
+    # $2 is task/gpu count
+    # export SLURM_HOSTFILE="$1"
+    srun --ntasks=$1 --gpus-per-task=1 --cpus-per-task=4 --ntasks-per-core=1 script.sh
+}
+
 # Writing host lists in cyclicly
 normal_no_host() {    
      my_srun_no_host 4 > nohost.normal.1.out 2>&1 &
      my_srun_no_host 4 > nohost.normal.2.out 2>&1 &
+     wait
 }
 
 
@@ -94,15 +101,9 @@ normal_no_host() {
 block_no_host() {
      my_srun_no_host 6 > nohost.block.1.out 2>&1 &
      my_srun_no_host 2 > nohost.block.2.out 2>&1 &
-     my_srun_no_host 2 > nohost.block.3.out 2>&1 &
-     my_srun_no_host 6 > nohost.block.4.out 2>&1 &
      wait
 
 }
-
-
-cyclic
-block
 
 # normal_no_host
 # block_no_host
