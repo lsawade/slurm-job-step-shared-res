@@ -2,7 +2,7 @@
 #SBATCH -t00:05:00
 #SBATCH -N 2
 #SBATCH -n 64
-# #  SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=4
 #SBATCH --ntasks-per-core=1
 #SBATCH --output=mixed_gpu.txt
 #SBATCH --reservation=test
