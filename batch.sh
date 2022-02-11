@@ -4,11 +4,11 @@
 #SBATCH -n 64
 #SBATCH --cpus-per-task=4
 #SBATCH --ntasks-per-core=1
-# # SBATCH --gpus-per-task=1
 #SBATCH --output=mixed_gpu.txt
 #SBATCH --reservation=test
 #SBATCH --gres=gpu:4
-# # SBATCH --gpus-per-node=4
+
+
 
 
 # The above request will ask for 3 nodes on Traverse
@@ -18,8 +18,19 @@
 # on a total of 3 nodes at the same time. This means that the job steps
 # have to share one node. Usually this should be possible using the
 # --distribution=arbitrary option and providing a nodelist to
-# slurm. That however doesn't seem to be the case on traverse
-# 
+# slurm.
+#
+# The above now seems to work. But one ***cannot*** ask for G=8 or gpus-per-task.
+# SBATCH --gres=gpu:4, just make the GPUs available in the allocation and
+# then the srun commands should take care of everything.
+#
+# It is important to note that I'm requesting 64 tasks (32 per node), but each
+# task is allocation 4 cpus. This actually means 4 threads because the Power9
+# CPUs have hardware threads that are explicitly available through slurm. Meaning
+# the total number of tasks available per node is 128 [32 * 4]. But there are only
+# 32 physical cores. When a GPU gets bound to a multiple threads on a single physical
+# core there are allocation issues. Hence, We specify cpus-per-task=4, ntask-per-core=1.
+# and then only so many tasks as there are available on each node!
 
 
 module load openmpi/gcc cudatoolkit
@@ -89,5 +100,9 @@ block_no_host() {
 
 }
 
-normal_no_host
-block_no_host
+
+cyclic
+block
+
+# normal_no_host
+# block_no_host
