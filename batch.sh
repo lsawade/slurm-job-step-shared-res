@@ -95,8 +95,6 @@ normal_no_host() {
      wait
 }
 
-
-
 # Writinng host files in block
 block_no_host() {
      my_srun_no_host 6 > nohost.block.1.out 2>&1 &
@@ -105,5 +103,23 @@ block_no_host() {
 
 }
 
+my_srun_single_no_host() {
+    # $1 is hosfile
+    # $2 is task/gpu count
+    # export SLURM_HOSTFILE="$1"
+    srun -N1 --ntasks=$1 --gpus-per-task=1 --cpus-per-task=4 --ntasks-per-core=1 script.sh
+}
+
+
+single_no_host() {    
+     for i in {1..8}
+     do
+	 my_srun_single_no_host 1 > nohost.single.${i}.out 2>&1 &
+     done
+     wait
+}
+
+
 normal_no_host
+single_no_host
 block_no_host
