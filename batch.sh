@@ -77,8 +77,8 @@ block() {
 }
 
 
-cyclic
-block
+# cyclic
+# block
 
 
 my_srun_no_host() {
@@ -105,5 +105,5 @@ block_no_host() {
 
 }
 
-# normal_no_host
-# block_no_host
+normal_no_host
+block_no_host
